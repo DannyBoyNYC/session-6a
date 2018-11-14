@@ -19,10 +19,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('app'));
 app.use(fileUpload());
 
-app.get('/', function(req, res) {
-  res.sendFile(__dirname + '/app/index.html');
-});
-
 app.get('/api/recipes', recipes.findAll);
 app.get('/api/recipes/:id', recipes.findById);
 app.post('/api/recipes', recipes.add);
@@ -31,6 +27,20 @@ app.delete('/api/recipes/:id', recipes.delete);
 app.get('/api/import', recipes.import);
 app.get('/api/killall', recipes.killall);
 app.post('/api/upload', recipes.upload);
+
+// app.get('/recipes/:recipeId', function(req, res) {
+//   res.sendFile(__dirname + '/app/index.html');
+// });
+
+// app.get('/recipes', function(req, res) {
+//   res.sendFile(__dirname + '/app/index.html');
+// });
+
+app.get('*', function(req, res) {
+  res.sendFile(__dirname + '/app/index.html');
+});
+
+
 
 const PORT = process.env.PORT || 3000;
 

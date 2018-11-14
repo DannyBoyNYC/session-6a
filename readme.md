@@ -207,11 +207,9 @@ The npm installs for Angular:
 npm i -S angular@1.6.2 angular-route@1.6.2
 ```
 
-In the old days you would use `<script>` tags to access libraries etc., e.g.:
+In the old days you would use `<script>` tags to access libraries etc., e.g.: `<script src="https://code.angularjs.org/1.6.2/angular.js"></script>`.
 
-`<script src="https://code.angularjs.org/1.6.2/angular.js"></script>`
-
-Since we are bundling we use ES6 imports and our installed packages in `node_modules`.
+Since we are bundling we will use ES6 imports and our installed packages in `node_modules`.
 
 Delete all the content in `index.js` and import angular and angular routing into `index.js`:
 
@@ -234,7 +232,7 @@ Bootstrap the app in `index.html` and add a custom tag:
 </body>
 ```
 
-Create the first component:
+Create the first component in `index.js`:
 
 ```js
 import angular from 'angular';
@@ -252,38 +250,64 @@ app.component('recipeList', {
 
 View the page in the browser.
 
+We created an instance of a module called `foodApp` in the variable `app` and optionally loaded front end routing (`ngRoute`) using dependency injection.
 
-- [MVC](https://en.wikipedia.org/wiki/Model–view–controller) - Model, View, Controller
-- `{{ }}` - "moustaches" or "handlebars" in the template evaluate a value
+`$scope` is our _state_ - data at a particular moment in time. It’s the present state of our data.
+
+With this approach, instead of targeting specific elements in the DOM and adjusting a class here or a style there, you treat your data, or state, as the single source of truth.
+
+Other items to note:
+
+- [MVC](https://en.wikipedia.org/wiki/Model–view–controller) - Model, View, Controller is represented here
+- `{{ }}` - "moustaches" or "handlebars" in the template evaluate similar to how `${...}` works in template strings
 - `$scope` - the "glue" between application controller and the view (the state)
 - ng-model (and ng-repeat etc.) is an Angular [directive](https://docs.angularjs.org/api/ng/directive)
-- AngularJS vs Angular
-- Dependency injection for `ngRoute`
+- Dependency injection for `ngRoute`, the router for front end views
 
-`ngRoute` is the router for front end views. Always include a single route in Express for your SPA page. Front end routes handle the view (templates) and the logic (controllers) for the views.
+Note: always include a single route in Express for your SPA page. Front end routes handle the view (templates) and the logic (controllers) for the views.
 
 Add a template in a new folder: `app > templates > recipes.html`:
 
-```html`
+```html
 <div class="wrap">
   <h2>Recipes</h2>
   <ul class="recipes">
     <li ng-repeat="recipe in recipes">
-    <img ng-src="img/{{ recipe.image }}">
-    <h2><a href="recipes/{{ recipe._id }}">{{ recipe.title }}</a></h2>
-    <p>{{ recipe.description }}</p>
+      <img ng-src="img/{{ recipe.image }}">
+      <h2><a href="recipes/{{ recipe._id }}">{{ recipe.title }}</a></h2>
+      <p>{{ recipe.description }}</p>
     </li>
   </ul>
-  </div>
+</div>
 ```
 
-Edit the template declaration in myapp.js `templateUrl: '/templates/recipes.html',`:
+Edit the template declaration in `myapp.js`: `templateUrl: '/templates/recipes.html',`:
 
 ```js
 app.component('recipeList', {
   templateUrl: '/templates/recipes.html',
   controller: function RecipeListController($scope) {
     $scope.name = 'Recipe List'
+  }
+});
+```
+
+### $HTTP
+
+We fetch the dataset from our server using Angular's built-in [$http](https://docs.angularjs.org/api/ng/service/$http) service.
+
+- `$http` is a core (built into Angular) service that facilitates communication with servers
+- we need to make it available to the recipeList component's controller via [dependency injection](https://docs.angularjs.org/guide/di)
+
+Use the `get` method with `$http` to fetch the json from our recipes api:
+
+```js
+app.component('recipeList', {
+  templateUrl: '/templates/recipes.html',
+  controller: function RecipeListController($scope, $http) {
+    $http.get('api/recipes').then( res => {
+      $scope.recipes = res.data;
+    });
   }
 });
 ```
@@ -326,16 +350,18 @@ app.config(function config($locationProvider, $routeProvider) {
 
 Note the `$`'s. These are [services](https://docs.angularjs.org/api/ng/service) and are made available to a function by declaring them.
 
-Add in the head of index.html:
+Add in the head of `index.html`:
 
 `<base href="/">`
 
 Currently the component is hard coded:
 
 ```html
+<body ng-app="foodApp">
   <div>
     <recipe-list></recipe-list>
   </div>
+</div>
 ```
 
 Use the `ng-view` directive to alow it to use whatever module we pass into it:
@@ -355,6 +381,9 @@ app.config(function config($locationProvider, $routeProvider) {
       template: `
       <div class="wrap">
         <h1>Home</h1>
+        <p>
+          <a href="recipes">Recipes</a>
+        </p>
       </div>
       `
     })
@@ -365,29 +394,19 @@ app.config(function config($locationProvider, $routeProvider) {
 });
 ```
 
-### $HTTP
+Test the route. Test the back / forward buttons and refresh.
 
-We fetch the dataset from our server using Angular's built-in [$http](https://docs.angularjs.org/api/ng/service/$http) service.
+We do not have a path for `/recipes`.
 
-- a core (built into Angular) service that facilitates communication with the remote HTTP servers
-- need to make it available to the recipeList component's controller via [dependency injection](https://docs.angularjs.org/guide/di)
-- AngularJS predates `fetch`
-
-Use `get` method with `$http` to fetch the json from the data folder:
+We could use a `*`:
 
 ```js
-app.component('recipeList', {
-  templateUrl: '/templates/recipes.html',
-  controller: function RecipeListController($scope, $http) {
-    $http.get('api/recipes').then( res => {
-      $scope.recipes = res.data;
-      console.log($scope.recipes);
-    });
-  }
+app.get('*', function(req, res) {
+  res.sendFile(__dirname + '/app/index.html');
 });
 ```
 
-Test the route. 
+But then our other routes would never fire.
 
 Note the routes in Express - `app.js`. Since they run in order we will change our front end route to a universal selector and move it so that it appears after all our api routes:
 
@@ -422,7 +441,7 @@ To make the providers, services and directives defined in `ngRoute` available to
 angular.module('foodApp', ['ngRoute']);
 ```
 
-Application routes in Angular are declared via `$routeProvider`. This service makes it easy to wire together controllers, view templates, and the current URL location in the browser.
+Application routes are declared via `$routeProvider`. This service makes it easy to wire together controllers, view templates, and the current URL location in the browser.
 
 Add a route in `index.js` for the new recipe links:
 
@@ -442,9 +461,9 @@ app.config(function config($locationProvider, $routeProvider) {
 });
 ```
 
-All variables defined with the `:` prefix are extracted into a (injectable) `$routeParams` object.
+As with Express, variables are defined with the `:` prefix. They are extracted into a (injectable) `$routeParams` object.
 
-We inject the routeParams service of `ngRoute` into our controller so that we can extract the recipeId and use it in our stub.
+We inject the routeParams service of `ngRoute` into our controller so that we can extract the recipeId and use it in a stub.
 
 ```js
 app.component('recipeDetail', {
