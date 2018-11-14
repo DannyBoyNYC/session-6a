@@ -13,6 +13,12 @@
   <form action="/" method="get">
     <button>Refresh</button>
   </form>
+
+  <form action='/api/upload' method='post' encType="multipart/form-data" >
+    <input type="file" name="file" />
+    <input type="text" placeholder="File name (.jpg only?)" name="filename" />
+    <button type='submit'>Submit</button>
+  </form>  
   
   <form action="/api/recipes" method="POST">
     <input type="text" placeholder="Recipe Title" name="title">

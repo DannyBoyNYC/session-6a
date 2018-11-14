@@ -9,7 +9,7 @@ Work on your API for the midterm.
 Clone the current session by `cd`ing to the desktop and entering:
 
 ```sh
-git clone https://github.com/front-end-intermediate/session-5.git
+git clone https://github.com/front-end-intermediate/session-6a.git
 ```
 
 `cd` into the newly cloned folder, install the npm components from last class and kick off the application:
@@ -127,13 +127,59 @@ See [the documentation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/
 
 We will use the [File Upload npm package for Expressjs](https://www.npmjs.com/package/express-fileupload).
 
+Install it:
 
+`npm i express-fileupload -S`
+
+Add the required lines to `app.js`:
+
+```js
+...
+const fileUpload = require('express-fileupload'); 
+...
+app.use(fileUpload());
+...
+app.post('/api/upload', recipes.upload);
+```
+
+Looking at the [example project](https://github.com/richardgirges/express-fileupload/tree/master/example) we find a form to use as a starting point.
+
+```html
+<form action='/api/upload' method='post' encType="multipart/form-data" >
+  <input type="file" name="file" />
+  <input type="text" placeholder="File name (.jpg only?)" name="filename" />
+  <button type='submit'>Submit</button>
+</form>  
+```
+
+Here is a working function for the api endpoint:
+
+```js
+exports.upload = function(req, res, next) {
+  console.log(req.files)
+  if (Object.keys(req.files).length == 0) {
+    return res.status(400).send('No files were uploaded.');
+  }
+  let file = req.files.file;
+  file.mv(`./app/img/${req.body.filename}.jpg`, err => {
+    if (err) {
+      return res.status(500).send(err);
+    }
+    res.json({ file: `app/img/${req.body.filename}.jpg` });
+    console.log(res.json);
+  });
+};
+```
+
+Upload an image and create a recipe that uses it.
 
 ## Angular as a Templating Engine
 
 Let's look at using Angular as our page templating language. Documentation for the features we will be using is located [here](https://docs.angularjs.org/guide).
 
-Save the contents of `index.js` and `index.html` to `index-OLD.html` and `index-OLD.js`. 
+<!-- Save the contents of `index.js` and `index.html` to `index-OLD.html` and `index-OLD.js`.  -->
+
+Create a new branch.
 
 Edit `index.html` page in the `app` directory:
 
@@ -1049,36 +1095,15 @@ https://www.zeolearn.com/magazine/connecting-reactjs-frontend-with-nodejs-backen
 
 
 
-```js
-const cors = require('cors'); // addition we make
-const fileUpload = require('express-fileupload'); //addition we make
-app.use(fileUpload());
 
-app.post('/api/upload', recipes.upload);
-
-exports.upload = function(req, res, next) {
-  console.log(req.files)
-  if (Object.keys(req.files).length == 0) {
-    return res.status(400).send('No files were uploaded.');
-  }
-  let file = req.files.file;
-  file.mv(`./app/img/${req.body.filename}.jpg`, err => {
-    if (err) {
-      return res.status(500).send(err);
-    }
-    res.json({ file: `app/img/${req.body.filename}.jpg` });
-    console.log(res.json);
-  });
-};
-```
 
 ```html
   <div>
-    <form action='/api/upload' method='post' encType="multipart/form-data" >
-      <input type="file" name="file" />
-      <input type="text" placeholder="File name (.jpg only)" name="filename" />
-      <button type='submit'>Submit</button>
-    </form>   
+<form action='/api/upload' method='post' encType="multipart/form-data" >
+  <input type="file" name="file" />
+  <input type="text" placeholder="File name (.jpg only)" name="filename" />
+  <button type='submit'>Submit</button>
+</form>   
   </div>
 ```
 
