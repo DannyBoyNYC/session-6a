@@ -34527,12 +34527,45 @@ app.component('recipeList', {
     $http.get('api/recipes').then(function (res) {
       $scope.recipes = res.data;
     });
+
+    $scope.deleteRecipe = function (index, recipeId) {
+      $http.delete('api/recipes/' + recipeId).then(function () {
+        return $scope.recipes.splice(index, 1);
+      });
+    };
+
+    $scope.addRecipe = function (data) {
+      $http.post('api/recipes', data).then(function () {
+        $scope.recipes.push(res.data);
+        $scope.recipe = {};
+      });
+    };
   }
 });
 app.component('recipeDetail', {
-  template: '<p>View for {{recipeId}}</p>',
-  controller: function recipeDetailController($scope, $routeParams) {
-    $scope.recipeId = $routeParams.recipeId;
+  templateUrl: '/templates/recipe.html',
+  controller: function recipeDetailController($scope, $http, $routeParams) {
+    $http.get('api/recipes/' + $routeParams.recipeId).then(function (res) {
+      $scope.recipe = res.data;
+    }); // $scope.saveRecipe = function(recipe, recipeId) {
+    //   $http.put('/api/recipes' + recipeId, recipe)
+    // }
+
+    $scope.saveRecipe = function (recipe, recipeid) {
+      $http.put('/api/recipes/' + recipeid, recipe).then(function (res) {
+        return $scope.editorEnabled = false;
+      });
+    };
+
+    $scope.editorEnabled = false;
+
+    $scope.toggleEditor = function () {
+      $scope.editorEnabled = !$scope.editorEnabled;
+    };
+
+    $scope.back = function () {
+      return window.history.back();
+    };
   }
 });
 

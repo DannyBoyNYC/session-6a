@@ -22,12 +22,44 @@ app.component('recipeList', {
     $http.get('api/recipes').then( res => {
       $scope.recipes = res.data;
     })
+    $scope.deleteRecipe = (index, recipeId) => {
+      $http.delete('api/recipes/' + recipeId)
+      .then( () => $scope.recipes.splice(index, 1))
+    }
+    $scope.addRecipe = function(data){
+      $http.post('api/recipes', data)
+      .then( () => {
+        $scope.recipes.push(res.data)
+        $scope.recipe = {}
+      })
+    }
   }
 })
 
 app.component('recipeDetail', {
-  template: '<p>View for {{recipeId}}</p>',
-  controller: function recipeDetailController($scope, $routeParams){
-    $scope.recipeId = $routeParams.recipeId
+  templateUrl: '/templates/recipe.html',
+  controller: function recipeDetailController($scope, $http, $routeParams){
+    $http.get('api/recipes/' + $routeParams.recipeId)
+    .then( res => {
+      $scope.recipe = res.data
+    })
+
+    // $scope.saveRecipe = function(recipe, recipeId) {
+    //   $http.put('/api/recipes' + recipeId, recipe)
+    // }
+
+    $scope.saveRecipe = (recipe, recipeid) => {
+      $http.put('/api/recipes/' + recipeid, recipe)
+      .then(res => ($scope.editorEnabled = false));
+    };
+
+    $scope.editorEnabled = false;
+
+    $scope.toggleEditor = () => {
+      $scope.editorEnabled = !$scope.editorEnabled
+    }
+
+    $scope.back = () => window.history.back();
   }
-})
+});
+
