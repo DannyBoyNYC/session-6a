@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const fileUpload = require('express-fileupload'); 
 
 const recipeModels = require('./api/recipe.model');
 const recipes = require('./api/recipe.controllers');
@@ -17,6 +18,7 @@ console.log(mongoUri)
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('app'));
+app.use(fileUpload());
 
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/app/index.html');
@@ -29,6 +31,7 @@ app.put('/api/recipes/:id', recipes.update);
 app.delete('/api/recipes/:id', recipes.delete);
 app.get('/api/import', recipes.import);
 app.get('/api/killall', recipes.killall);
+app.post('/api/upload', recipes.upload);
 
 const PORT = process.env.PORT || 3000;
 
