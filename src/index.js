@@ -1,7 +1,8 @@
 import angular from 'angular';
 import ngRoute from 'angular-route';
+import ngAnimate from 'angular-animate';
 
-const app = angular.module('foodApp', ['ngRoute']);
+const app = angular.module('foodApp', ['ngRoute', 'ngAnimate']);
 
 app.config(function config($locationProvider, $routeProvider){
   $routeProvider.when('/', {

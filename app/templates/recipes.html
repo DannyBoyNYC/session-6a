@@ -9,7 +9,7 @@
   </form>
 
   <ul class="recipes">
-    <li ng-repeat="recipe in recipes">
+    <li ng-repeat="recipe in recipes" class="fade">
       <img ng-src="img/{{ recipe.image }}">
       <h2>
         <a href="recipes/{{ recipe._id }}">{{ recipe.title }}</a></h2>

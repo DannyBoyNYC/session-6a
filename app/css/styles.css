@@ -26,6 +26,30 @@ a {
     border-bottom: 3px solid #bada55; }
   .recipes p {
     font-size: 1.25rem; }
+  .recipes li:nth-child(odd) {
+    background: #bada55; }
+  .recipes .fade.ng-enter {
+    animation: 2s appear; }
+  .recipes .fade.ng-leave {
+    animation: 0.5s disappear; }
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateX(-200px); }
+  to {
+    opacity: 1; } }
+
+@keyframes disappear {
+  0% {
+    opacity: 1; }
+  50% {
+    font-size: 0.75rem; }
+  75% {
+    color: green; }
+  100% {
+    opacity: 0;
+    transform: translateX(-100%); } }
 
 nav {
   height: 6rem; }
